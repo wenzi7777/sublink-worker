@@ -19,7 +19,17 @@ async function handleRequest(request) {
       });
     } else if (request.method === 'POST' && url.pathname === '/') {
       const formData = await request.formData();
-      const inputString = formData.get('input');
+      const remoteURL = formData.get('remoteURL');
+
+      let inputString = formData.get('input');
+      if (remoteURL) {
+        const response = await fetch(remoteURL);
+        if (!response.ok) {
+          return new Response('Failed to fetch remote URL', { status: 400 });
+        }
+        inputString = await response.text();
+      }
+
       const selectedRules = formData.getAll('selectedRules');
       const customRuleDomains = formData.getAll('customRuleSite[]');
       const customRuleIPs = formData.getAll('customRuleIP[]');
@@ -45,7 +55,17 @@ async function handleRequest(request) {
         headers: { 'Content-Type': 'text/html' }
       });
     } else if (url.pathname.startsWith('/singbox') || url.pathname.startsWith('/clash')) {
-      const inputString = url.searchParams.get('config');
+      const remoteURL = url.searchParams.get('remoteURL');
+      let inputString = url.searchParams.get('config');
+
+      if (remoteURL) {
+        const response = await fetch(remoteURL);
+        if (!response.ok) {
+          return new Response('Failed to fetch remote URL', { status: 400 });
+        }
+        inputString = await response.text();
+      }
+
       let selectedRules = url.searchParams.get('selectedRules');
       let customRules = url.searchParams.get('customRules');
 
@@ -157,8 +177,17 @@ async function handleRequest(request) {
 
       return Response.redirect(originalUrl, 302);
     } else if (url.pathname.startsWith('/xray')) {
-      // Handle Xray config requests
-      const inputString = url.searchParams.get('config');
+      const remoteURL = url.searchParams.get('remoteURL');
+      let inputString = url.searchParams.get('config');
+
+      if (remoteURL) {
+        const response = await fetch(remoteURL);
+        if (!response.ok) {
+          return new Response('Failed to fetch remote URL', { status: 400 });
+        }
+        inputString = await response.text();
+      }
+
       const proxylist = inputString.split('\n');
 
       const finalProxyList = [];
